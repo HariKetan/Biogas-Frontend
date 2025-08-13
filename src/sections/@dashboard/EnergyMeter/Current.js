@@ -87,12 +87,12 @@ const Current = () => {
         textAlign: "center",
         boxShadow: 20,
         color: "black", // Same black font color as YCard
-        bgcolor: "#F0E68C", // Same yellow background as YCard
+        bgcolor: "#e67e22", // Same yellow background as YCard
       }}
     >
       <div
         style={{
-          background: "#ffd43b", // Same darker yellow header as YCard
+          background: "#d35400", // Same darker yellow header as YCard
           padding: "10px",
           textAlign: "center",
           display: "flex",

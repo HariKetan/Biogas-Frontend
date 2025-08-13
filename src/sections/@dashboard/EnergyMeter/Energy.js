@@ -87,12 +87,12 @@ const Energy = () => {
         textAlign: "center",
         boxShadow: 20,
         color: "white",
-        bgcolor: "#a382c6", // Same purple background as Frequency
+        bgcolor: "#476f95", // Same purple background as Frequency
       }}
     >
       <div
         style={{
-          background: "#67367c", // Same darker purple header as Frequency
+          background: "#194a7a", // Same darker purple header as Frequency
           padding: "10px",
           textAlign: "center",
           display: "flex",

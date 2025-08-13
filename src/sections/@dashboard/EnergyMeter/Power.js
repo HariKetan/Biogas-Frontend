@@ -87,12 +87,12 @@ const Power = () => {
         textAlign: "center",
         boxShadow: 20,
         color: "black", // Same black font color as BCard
-        bgcolor: "#74c0fc", // Same blue background as BCard
+        bgcolor: "#ecf0f1", // Same blue background as BCard
       }}
     >
       <div
         style={{
-          background: "#3498db", // Same darker blue header as BCard
+          background: "#bdc3c7", // Same darker blue header as BCard
           padding: "10px",
           textAlign: "center",
           display: "flex",

@@ -87,12 +87,12 @@ const Voltage = () => {
         textAlign: "center",
         boxShadow: 20,
         color: "white",
-        bgcolor: "#DC4C64", // Same red background as RCard
+        bgcolor: "#2ecc71", // Same red background as RCard
       }}
     >
       <div
         style={{
-          background: "#cc0000", // Same darker red header as RCard
+          background: "#27ae60", // Same darker red header as RCard
           padding: "10px",
           textAlign: "center",
           display: "flex",
