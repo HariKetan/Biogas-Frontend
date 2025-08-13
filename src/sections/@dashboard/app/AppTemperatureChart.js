@@ -152,7 +152,7 @@ export default function AppTemperatureChart() {
         rotateAlways: false,
         style: {
           fontSize: '10px',
-          color: '#263238'
+          color: '#000'
         },
         formatter(value, opts) {
           return value;

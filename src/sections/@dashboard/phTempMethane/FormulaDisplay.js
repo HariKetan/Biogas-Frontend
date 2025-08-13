@@ -1,184 +1,169 @@
 import React from "react";
-import { Card, Typography, Box } from "@mui/material";
+import { Card } from "@mui/material";
 
 const FormulaDisplay = () => {
   return (
     <Card
       sx={{
         width: "100%",
-        height: 150,
+        height: 200,
         margin: 0,
         marginTop: 2,
-        display: "flex",
-        flexDirection: "column",
+        display: "grid",
+        gridTemplateRows: "1fr 1fr",
         textAlign: "center",
         boxShadow: 20,
         color: "black",
         bgcolor: "lightgrey",
       }}
     >
-      <Box
-        sx={{
+      <div
+        style={{
           padding: "20px",
           textAlign: "center",
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "15px",
+          display: "grid",
+          gridTemplateRows: "1fr 1fr",
+          // gap: "15px",
+          height: "100%",
         }}
       >
         {/* Headings Row */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
             alignItems: "center",
             width: "100%",
-            gap: "10px",
+            gap: "60px",
           }}
         >
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              flex: 1, 
+          <div 
+            style={{ 
               color: "#333", 
               fontWeight: "bold",
               margin: "0 5px",
+              display: "grid",
+              placeItems: "center",
+              fontSize: "1.25rem",
             }}
           >
-            Carbon Credits
-          </Typography>
+            Total {'>'} 100
+          </div>
           
-          {/* <Box sx={{ flex: "0 0 auto", width: "40px" }}></Box> */}
-          
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              flex: 1, 
+          <div 
+            style={{ 
               color: "#333", 
               fontWeight: "bold",
               margin: "0 5px",
+              display: "grid",
+              placeItems: "center",
+              fontSize: "1.25rem",
             }}
           >
-            Methane Gas
-          </Typography>
+            Total {'<'} 100
+          </div>
           
-          {/* <Box sx={{ flex: "0 0 auto", width: "40px" }}></Box> */}
-          
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              flex: 1, 
+          <div 
+            style={{ 
               color: "#333", 
               fontWeight: "bold",
               margin: "0 5px",
+              display: "grid",
+              placeItems: "center",
+              fontSize: "1.25rem",
             }}
           >
-            Total Output
-          </Typography>
-        </Box>
+            Total
+          </div>
+        </div>
 
         {/* Formula Row */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr auto 1fr auto 1fr",
             alignItems: "center",
             width: "100%",
             gap: "10px",
           }}
         >
           {/* First bracket */}
-          <Box
-            sx={{
-              flex: 1,
+          <div
+            style={{
               height: "60px",
-              border: "3px solid #333",
-              borderRadius: "8px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "white",
-              boxShadow: "inset 0 0 10px rgba(0,0,0,0.1)",
+              display: "grid",
+              placeItems: "center",
               margin: "0 5px",
+              border: "2px solid #333",
+              borderRadius: "8px",
             }}
           >
-            <Typography variant="h6" sx={{ color: "#666", fontWeight: "bold" }}>
+            <div style={{ color: "#000", fontWeight: "bold", fontSize: "2.125rem" }}>
               Input 1
-            </Typography>
-          </Box>
+            </div>
+          </div>
 
           {/* Plus sign */}
-          <Typography 
-            variant="h3" 
-            sx={{ 
+          <div 
+            style={{ 
               fontWeight: "bold", 
               color: "#333",
               margin: "0 10px",
-              flex: "0 0 auto",
+              display: "grid",
+              placeItems: "center",
+              fontSize: "3rem",
             }}
           >
             +
-          </Typography>
+          </div>
 
           {/* Second bracket */}
-          <Box
-            sx={{
-              flex: 1,
+          <div
+            style={{
               height: "60px",
-              border: "3px solid #333",
-              borderRadius: "8px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "white",
-              boxShadow: "inset 0 0 10px rgba(0,0,0,0.1)",
+              display: "grid",
+              placeItems: "center",
               margin: "0 5px",
+              border: "2px solid #333",
+              borderRadius: "8px",
             }}
           >
-            <Typography variant="h6" sx={{ color: "#666", fontWeight: "bold" }}>
+            <div style={{ color: "#000", fontWeight: "bold", fontSize: "2.125rem" }}>
               Input 2
-            </Typography>
-          </Box>
+            </div>
+          </div>
 
           {/* Equals sign */}
-          <Typography 
-            variant="h3" 
-            sx={{ 
+          <div 
+            style={{ 
               fontWeight: "bold", 
               color: "#333",
               margin: "0 10px",
-              flex: "0 0 auto",
+              display: "grid",
+              placeItems: "center",
+              fontSize: "3rem",
             }}
           >
             =
-          </Typography>
+          </div>
 
           {/* Result bracket */}
-          <Box
-            sx={{
-              flex: 1,
+          <div
+            style={{
               height: "60px",
-              border: "3px solid #333",
-              borderRadius: "8px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "white",
-              boxShadow: "inset 0 0 10px rgba(0,0,0,0.1)",
+              display: "grid",
+              placeItems: "center",
               margin: "0 5px",
+              border: "2px solid #333",
+              borderRadius: "8px",
             }}
           >
-            <Typography variant="h6" sx={{ color: "#666", fontWeight: "bold" }}>
+            <div style={{ color: "#000", fontWeight: "bold", fontSize: "2.125rem" }}>
               Result
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
+            </div>
+          </div>
+        </div>
+      </div>
     </Card>
   );
 };

@@ -6,6 +6,35 @@ import { Card, CardHeader, Box, Typography } from '@mui/material';
 import { useChart } from '../../../components/chart';
 import Biogasapi from '../../../pages/apis/Biogasapi';
 
+// Custom CSS for tooltip styling
+const tooltipStyles = `
+  .apexcharts-tooltip {
+    background: #2c3e50 !important;
+    border: 2px solid #34495e !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+  }
+  
+  .apexcharts-tooltip-title {
+    background: #34495e !important;
+    color: #ecf0f1 !important;
+    border-bottom: 1px solid #2c3e50 !important;
+    font-weight: bold !important;
+  }
+  
+  .apexcharts-tooltip-y-group {
+    color: #ecf0f1 !important;
+  }
+  
+  .apexcharts-tooltip-goals-group {
+    color: #ecf0f1 !important;
+  }
+  
+  .apexcharts-tooltip-marker {
+    background: #4CAF50 !important;
+  }
+`;
+
 // ----------------------------------------------------------------------
 
 export default function AppWeightChart() {
@@ -197,6 +226,11 @@ export default function AppWeightChart() {
     tooltip: {
       shared: true,
       intersect: false,
+      style: {
+        fontSize: '12px',
+        fontFamily: 'Helvetica, Arial, sans-serif'
+      },
+      theme: 'dark',
       x: {
         show: true,
         formatter(value, opts) {
@@ -211,6 +245,16 @@ export default function AppWeightChart() {
           return y;
         },
       },
+      custom: undefined,
+      fillSeriesColor: false,
+      marker: {
+        show: true,
+        fillColors: ['#4CAF50']
+      },
+      onDatasetHover: {
+        highlightDataSeries: true,
+      },
+      cssClass: 'apexcharts-custom-tooltip'
     },
     colors: ['#4CAF50'], // Green color for weight
     stroke: {
@@ -290,6 +334,7 @@ export default function AppWeightChart() {
         bgcolor: "lightgrey",
       }}
     >
+      <style>{tooltipStyles}</style>
       <div
         style={{
           background: "#708090",
