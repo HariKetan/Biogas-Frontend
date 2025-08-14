@@ -13,11 +13,11 @@ export default function AppTemperatureChart() {
   const [currentTemperature, setCurrentTemperature] = useState(0);
   const [historicalData, setHistoricalData] = useState([]);
 
-  // Fetch temperature data
+  // Fetch pH4 data
   useEffect(() => {
-    const fetchTemperatureData = async () => {
+    const fetchPh4Data = async () => {
       try {
-        const response = await Biogasapi.get("/dashboard");
+        const response = await Biogasapi.get("/dashboard?device_id=1368");
         
         console.log('Full API Response:', response);
         console.log('Response data length:', response.data?.length);
@@ -26,8 +26,8 @@ export default function AppTemperatureChart() {
           console.log('API Response Data:', response.data);
           
           const firstSensorValue = response.data[0];
-          const currentTemp = firstSensorValue.temperature ? parseFloat(firstSensorValue.temperature) : 0;
-          setCurrentTemperature(currentTemp);
+          const currentTemperature = firstSensorValue.ph4 ? parseFloat(firstSensorValue.ph4) : 0;
+          setCurrentTemperature(currentTemperature);
           
           // Store all historical data
           setHistoricalData(response.data);
@@ -38,16 +38,16 @@ export default function AppTemperatureChart() {
           
           if (response.data.length === 1) {
             // Create multiple data points for better visualization
-            const baseTemp = currentTemp;
+            const baseTemperature = currentTemperature;
             const now = new Date();
             
             // Create 10 data points over the last 30 minutes
             for (let i = 9; i >= 0; i -= 1) {
               const time = new Date(now.getTime() - i * 3 * 60 * 1000); // 3-minute intervals
-              const variation = (Math.random() - 0.5) * 2; // Small random variation
-              const temp = baseTemp + variation;
+              // const variation = (Math.random() - 0.5) * 0.5; // Small random variation for pH
+              const temperature = baseTemperature;
               
-              chartDataPoints.push(parseFloat(temp.toFixed(1)));
+              chartDataPoints.push(parseFloat(temperature.toFixed(2)));
               timeLabels.push(time.toLocaleTimeString('en-US', { 
                 hour: '2-digit', 
                 minute: '2-digit',
@@ -59,9 +59,9 @@ export default function AppTemperatureChart() {
             const reversedData = [...response.data].reverse();
             
             chartDataPoints = reversedData.map((item, index) => {
-              const temp = item.temperature ? parseFloat(item.temperature) : 0;
-              console.log(`Data point ${index}: temperature = ${temp}`);
-              return temp;
+              const temperature = item.ph4 ? parseFloat(item.ph4) : 0;
+              console.log(`Data point ${index}: ph4 = ${temperature}`);
+              return temperature;
             });
             
             timeLabels = reversedData.map((item, index) => {
@@ -84,7 +84,7 @@ export default function AppTemperatureChart() {
 
           setChartData([
             {
-              name: 'Temperature',
+              name: 'pH Level 4',
               type: 'line',
               fill: 'gradient',
               data: chartDataPoints,
@@ -94,15 +94,15 @@ export default function AppTemperatureChart() {
           console.log('No data received or empty response');
         }
       } catch (err) {
-        console.error('Error fetching temperature data:', err.message);
+        console.error('Error fetching pH4 data:', err.message);
       }
     };
 
     // Initial fetch
-    fetchTemperatureData();
+    fetchPh4Data();
 
     // Set up interval for real-time updates
-    const interval = setInterval(fetchTemperatureData, 30000); // Update every 30 seconds
+    const interval = setInterval(fetchPh4Data, 30000); // Update every 30 seconds
 
     return () => clearInterval(interval);
   }, []);
@@ -178,7 +178,7 @@ export default function AppTemperatureChart() {
     },
     yaxis: {
       title: {
-        text: 'Temperature (°C)',
+        text: 'pH Level',
         style: {
           fontSize: '12px',
           fontWeight: 600,
@@ -334,7 +334,7 @@ export default function AppTemperatureChart() {
           textAlign: "center",
         }}
       >
-        <Typography variant="h6">Current: {currentTemperature.toFixed(1)} °C</Typography>
+        <Typography variant="h6">Current: {currentTemperature.toFixed(1)}</Typography>
       </div>
     </Card>
   );

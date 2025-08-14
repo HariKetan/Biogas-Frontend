@@ -22,7 +22,7 @@ const StyledIcon = styled("div")(({ theme }) => ({
 }));
 
 const BCard = () => {
-  const [b,setb] = useState(0.0)
+  const [methane3, setMethane3] = useState(0.0)
   const [value, setValue] = useState(0.5); // Initial value
   const [isPopped, setIsPopped] = useState(false);
 
@@ -31,15 +31,15 @@ const BCard = () => {
   useEffect(() => {
     const fetchrecentvalues = async () => {
       try {
-          const response = await Biogasapi.get("/dashboard");
+          const response = await Biogasapi.get("/dashboard?device_id=1368");
   
           if (!response.error) {
 
             const firstSensorValue = response.data[0];
 
-            // Update only the 'r' value in the state
-            setb(firstSensorValue.b ? firstSensorValue.b : 0.0);            
-        //    console.log(firstSensorValue.r)
+            // Update only the 'methane3' value in the state
+            setMethane3(firstSensorValue.methane3 ? firstSensorValue.methane3 : 0.0);            
+        //    console.log(firstSensorValue.methane3)
 
           }
       } catch (err) {
@@ -49,23 +49,21 @@ const BCard = () => {
 
     const interval = setInterval(() => {
       fetchrecentvalues();
-  //    console.log(r)
+  //    console.log(methane3)
 
     }, 3000); // Update every 3 seconds
 
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-//    console.log(r); // You can remove or modify this line
-    setValue(b);
-    setIsPopped(true);
-
-    // Reset the popping effect after a short delay
-    setTimeout(() => {
-      setIsPopped(false);
-    }, 300);
-  }, [b]);
+  // Remove the problematic useEffect that was resetting the value
+  // useEffect(() => {
+  //   setValue(methane3);
+  //   setIsPopped(true);
+  //   setTimeout(() => {
+  //     setIsPopped(false);
+  //   }, 300);
+  // }, [methane3]);
   return (
     <Card
       sx={{
@@ -90,7 +88,7 @@ const BCard = () => {
           justifyContent: "center",
         }}
       >
-        <Typography variant="subtitle1"><h4>Blue</h4></Typography>
+        <Typography variant="subtitle1"><h4>Standard Velocity</h4></Typography>
       </div>
 
       <StyledIcon>
@@ -105,7 +103,7 @@ const BCard = () => {
           
         }}
       >
-        <Typography variant="h4">{`${(value).toFixed(2)}  Volts`}</Typography>
+        <Typography variant="h4">{`${(methane3).toFixed(2)} Nm/s`}</Typography>
       </div>
     </Card>
   );

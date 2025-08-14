@@ -31,7 +31,7 @@ const GaugePopup = styled("div")({
 });
 
 const RCard = () => {
-  const [r,setr] = useState(0.0)
+  const [methane1, setMethane1] = useState(0.0)
   const [value, setValue] = useState(0.5); // Initial value
   const [isPopped, setIsPopped] = useState(false);
 
@@ -40,15 +40,15 @@ const RCard = () => {
   useEffect(() => {
     const fetchrecentvalues = async () => {
       try {
-          const response = await Biogasapi.get("/dashboard");
+          const response = await Biogasapi.get("/dashboard?device_id=1368");
   
           if (!response.error) {
 
             const firstSensorValue = response.data[0];
 
-            // Update only the 'r' value in the state
-            setr(firstSensorValue.r ? firstSensorValue.r : 0.0);            
-        //    console.log(firstSensorValue.r)
+            // Update only the 'methane1' value in the state
+            setMethane1(firstSensorValue.methane1 ? firstSensorValue.methane1 : 0.0);            
+        //    console.log(firstSensorValue.methane1)
 
           }
       } catch (err) {
@@ -58,23 +58,21 @@ const RCard = () => {
 
     const interval = setInterval(() => {
       fetchrecentvalues();
-  //    console.log(r)
+  //    console.log(methane1)
 
     }, 3000); // Update every 3 seconds
 
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-//    console.log(r); // You can remove or modify this line
-    setValue(r);
-    setIsPopped(true);
-
-    // Reset the popping effect after a short delay
-    setTimeout(() => {
-      setIsPopped(false);
-    }, 300);
-  }, [r]);
+  // Remove the problematic useEffect that was resetting the value
+  // useEffect(() => {
+  //   setValue(methane1);
+  //   setIsPopped(true);
+  //   setTimeout(() => {
+  //     setIsPopped(false);
+  //   }, 300);
+  // }, [methane1]);
 
   return (
     <Card
@@ -100,7 +98,7 @@ const RCard = () => {
           justifyContent: "center",
          }}
       >
-        <Typography variant="subtitle1"><h4>Red</h4></Typography>
+        <Typography variant="subtitle1"><h4>Medium Temperature</h4></Typography>
       </div>
 
       <StyledIcon>
@@ -116,7 +114,7 @@ const RCard = () => {
         }}
       >
         <Typography variant="h4">
-          {`${(value).toFixed(2)} Volts`}
+          {`${(methane1).toFixed(2)} °C`}
         </Typography>
       </div>
     </Card>

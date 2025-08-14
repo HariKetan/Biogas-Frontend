@@ -46,7 +46,7 @@ export default function AppWeightChart() {
   useEffect(() => {
     const fetchWeightData = async () => {
       try {
-        const response = await Biogasapi.get("/dashboard");
+        const response = await Biogasapi.get("/dashboard?device_id=1368");
         
         console.log('Full API Response:', response);
         console.log('Response data length:', response.data?.length);
@@ -73,8 +73,7 @@ export default function AppWeightChart() {
             // Create 10 data points over the last 30 minutes
             for (let i = 9; i >= 0; i -= 1) {
               const time = new Date(now.getTime() - i * 3 * 60 * 1000); // 3-minute intervals
-              const variation = (Math.random() - 0.5) * 0.5; // Small random variation for weight
-              const weight = baseWeight + variation;
+              const weight = baseWeight;
               
               chartDataPoints.push(parseFloat(weight.toFixed(2)));
               timeLabels.push(time.toLocaleTimeString('en-US', { 

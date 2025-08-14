@@ -31,7 +31,7 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true,
+    open: false,
     host: true,
     cors: true,
     // Proxy API calls if needed

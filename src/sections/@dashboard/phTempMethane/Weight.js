@@ -21,41 +21,51 @@ const StyledIcon = styled("div")(({ theme }) => ({
     )} 100%)`,
 }));
 
-const getMethaneColor = (methane) => {
-  if (methane >= 80) {
+const getWeightColor = (weight) => {
+  if (weight >= 80) {
     return "#red";
   }
-  if (methane >= 60) {
+  if (weight >= 60) {
     return "#orangered";
   }
-  if (methane >= 40) {
+  if (weight >= 40) {
     return "#darkorange";
   }
-  if (methane >= 20) {
+  if (weight >= 20) {
     return "#khaki";
   }
   return "#lightgoldenrodyellow";
 };
 
 const Weight = () => {
-  const [weight,setweight] = useState(0.0)
-  const [value, setValue] = useState(0.5); // Initial value
+  const [weight, setWeight] = useState(0.0)
+  const [displayWeight, setDisplayWeight] = useState(0.0) // Smooth display value
   const [isPopped, setIsPopped] = useState(false);
 
+  // Function to check if weight change is significant enough to update
+  const isSignificantChange = (newWeight, currentWeight) => {
+    const changeThreshold = 0.1; // Only update if change is more than 0.1 kg
+    return Math.abs(newWeight - currentWeight) > changeThreshold;
+  };
 
   // Simulate live data updates
   useEffect(() => {
     const fetchrecentvalues = async () => {
       try {
-          const response = await Biogasapi.get("/dashboard");
+          const response = await Biogasapi.get("/dashboard?device_id=1368");
   
           if (!response.error) {
 
             const firstSensorValue = response.data[0];
+            const newWeight = firstSensorValue.weight ? parseFloat(firstSensorValue.weight) : 0.0;
 
-            // Update only the 'r' value in the state
-            setweight(firstSensorValue.weight ? firstSensorValue.weight : 0.0);            
-        //    console.log(firstSensorValue.r)
+            // Only update if the change is significant
+            if (isSignificantChange(newWeight, weight)) {
+              setWeight(newWeight);
+              console.log(`Weight updated: ${weight} -> ${newWeight}`);
+            }
+            
+        //    console.log(firstSensorValue.weight)
 
           }
       } catch (err) {
@@ -65,23 +75,33 @@ const Weight = () => {
 
     const interval = setInterval(() => {
       fetchrecentvalues();
-  //    console.log(r)
+  //    console.log(weight)
 
-    }, 3000); // Update every 3 seconds
+    }, 3000); // Update every 10 seconds instead of 3 seconds
 
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-//    console.log(r); // You can remove or modify this line
-    setValue(weight);
-    setIsPopped(true);
-
-    // Reset the popping effect after a short delay
-    setTimeout(() => {
-      setIsPopped(false);
-    }, 300);
   }, [weight]);
+
+  // Smooth the display value to prevent rapid switching
+  useEffect(() => {
+    if (Math.abs(displayWeight - weight) > 0.05) {
+      // Smooth transition to new weight value
+      const timer = setTimeout(() => {
+        setDisplayWeight(weight);
+      }, 500); // 500ms delay for smooth transition
+      
+      return () => clearTimeout(timer);
+    }
+  }, [weight, displayWeight]);
+
+  // Remove the problematic useEffect that was resetting the value
+  // useEffect(() => {
+  //   setValue(weight);
+  //   setIsPopped(true);
+  //   setTimeout(() => {
+  //     setIsPopped(false);
+  //   }, 300);
+  // }, [weight]);
 
   return (
     <Card
@@ -115,15 +135,15 @@ const Weight = () => {
       </StyledIcon>
 
       <ReactSpeedometer
-        maxValue={100}
+        maxValue={1000}
         minValue={0}
         height={190}
         width={290}
-        value={value}
+        value={displayWeight} // Use smooth display weight instead of raw weight
         needleTransition="easeQuadIn"
-        needleTransitionDuration={1000}
+        needleTransitionDuration={2000} // Slower transition for smoother movement
         needleColor="White"
-        startColor={getMethaneColor(value)}
+        startColor={getWeightColor(displayWeight)}
         endColor="#red"   
         segments={10} 
         segmentColors={[
@@ -150,7 +170,7 @@ const Weight = () => {
           textAlign: "center",
         }}
       >
-        <Typography variant="h5">{`${value.toFixed(2)} KG`}</Typography>
+        <Typography variant="h5">{`${displayWeight.toFixed(2)} KG`}</Typography>
       </div>
     </Card>
   );

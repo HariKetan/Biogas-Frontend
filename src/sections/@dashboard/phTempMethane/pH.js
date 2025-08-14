@@ -38,24 +38,34 @@ const getPhColor = (ph) => {
 };
 
 const PhComponent = () => {
-   const [ph,setph] = useState(0.0)
-  const [value, setValue] = useState(0.5); // Initial value
+   const [ph3, setPh3] = useState(0.0)
+  const [displayPh3, setDisplayPh3] = useState(0.0) // Smooth display value
   const [isPopped, setIsPopped] = useState(false);
 
+  // Function to check if pH3 change is significant enough to update
+  const isSignificantChange = (newPh3, currentPh3) => {
+    const changeThreshold = 0.1; // Only update if change is more than 0.1 pH
+    return Math.abs(newPh3 - currentPh3) > changeThreshold;
+  };
 
   // Simulate live data updates
   useEffect(() => {
     const fetchrecentvalues = async () => {
       try {
-          const response = await Biogasapi.get("/dashboard");
+          const response = await Biogasapi.get("/dashboard?device_id=1368");
   
           if (!response.error) {
 
             const firstSensorValue = response.data[0];
+            const newPh3 = firstSensorValue.ph3 ? parseFloat(firstSensorValue.ph3) : 0.0;
 
-            // Update only the 'r' value in the state
-            setph(firstSensorValue.ph ? firstSensorValue.ph : 0.0);            
-        //    console.log(firstSensorValue.r)
+            // Only update if the change is significant
+            if (isSignificantChange(newPh3, ph3)) {
+              setPh3(newPh3);
+              console.log(`pH3 updated: ${ph3} -> ${newPh3}`);
+            }
+            
+        //    console.log(firstSensorValue.ph3)
 
           }
       } catch (err) {
@@ -65,23 +75,33 @@ const PhComponent = () => {
 
     const interval = setInterval(() => {
       fetchrecentvalues();
-  //    console.log(r)
+  //    console.log(ph3)
 
-    }, 3000); // Update every 3 seconds
+    }, 3000); // Update every 10 seconds instead of 3 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [ph3]);
 
+  // Smooth the display value to prevent rapid switching
   useEffect(() => {
-//    console.log(r); // You can remove or modify this line
-    setValue(ph);
-    setIsPopped(true);
+    if (Math.abs(displayPh3 - ph3) > 0.05) {
+      // Smooth transition to new pH3 value
+      const timer = setTimeout(() => {
+        setDisplayPh3(ph3);
+      }, 500); // 500ms delay for smooth transition
+      
+      return () => clearTimeout(timer);
+    }
+  }, [ph3, displayPh3]);
 
-    // Reset the popping effect after a short delay
-    setTimeout(() => {
-      setIsPopped(false);
-    }, 300);
-  }, [ph]);
+  // Remove the problematic useEffect that was resetting the value
+  // useEffect(() => {
+  //   setValue(ph3);
+  //   setIsPopped(true);
+  //   setTimeout(() => {
+  //     setIsPopped(false);
+  //   }, 300);
+  // }, [ph3]);
 
   return (
     <Card
@@ -120,11 +140,11 @@ const PhComponent = () => {
         minValue={0}
         height={190}
         width={290}
-        value={value}
+        value={displayPh3} // Use smooth display pH3 instead of raw pH3
         needleTransition="easeQuadIn"
-        needleTransitionDuration={1000}
+        needleTransitionDuration={2000} // Slower transition for smoother movement
         needleColor="White"
-        startColor={getPhColor(value)}
+        startColor={getPhColor(displayPh3)}
         endColor="#red"   
         segments={10} 
         segmentColors={[ "#FFD700", // Gold
@@ -151,7 +171,7 @@ const PhComponent = () => {
 
         }}
       >
-        <Typography variant="h5">{`${value.toFixed(2)} pH`}</Typography>
+        <Typography variant="h5">{`${displayPh3.toFixed(2)} pH`}</Typography>
       </div>
     </Card>
   );

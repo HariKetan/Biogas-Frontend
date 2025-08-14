@@ -29,7 +29,7 @@ import {
 import BCard from '../sections/@dashboard/EnergyMeter/BCard';
 import RCard from '../sections/@dashboard/EnergyMeter/RCard';
 import YCard from '../sections/@dashboard/EnergyMeter/YCard';
-import Frequency from '../sections/@dashboard/EnergyMeter/Frequency';
+import Methane4 from '../sections/@dashboard/EnergyMeter/Frequency';
 import Voltage from '../sections/@dashboard/EnergyMeter/Voltage';
 import Current from '../sections/@dashboard/EnergyMeter/Current';
 import Power from '../sections/@dashboard/EnergyMeter/Power';
@@ -154,28 +154,28 @@ console.log(recentvalue)
               </Grid>
 
               <Grid item xs={12} sm={6} md={3}>
-              <Frequency/>
+              <Methane4/>
               </Grid>
 
               {/* New Energy Meter Cards */}
-              <Grid item xs={12} sm={6} md={3}>
+              {/* <Grid item xs={12} sm={6} md={3}>
                 <Voltage/>
-              </Grid>
+              </Grid> */}
 
-              <Grid item xs={12} sm={6} md={3}>
+              {/* <Grid item xs={12} sm={6} md={3}>
                 <Current/>
-              </Grid>
+              </Grid> */}
 
-              <Grid item xs={12} sm={6} md={3}>
+              {/* <Grid item xs={12} sm={6} md={3}>
                 <Power/>
-              </Grid>
+              </Grid> */}
 
-              <Grid item xs={12} sm={6} md={3}>
+              {/* <Grid item xs={12} sm={6} md={3}>
                 <Energy/>
-              </Grid>
+              </Grid> */}
 
                {/* Temperature and Humidity Charts */}
-              <Grid item xs={12} sm={6} md={4}>
+              {/* <Grid item xs={12} sm={6} md={4}>
                 <AppTemperatureChart />
               </Grid>
               
@@ -184,16 +184,16 @@ console.log(recentvalue)
               </Grid>
 
               {/* Weight Chart */}
-              <Grid item xs={12} sm={6} md={4}>
+              {/* <Grid item xs={12} sm={6} md={4}>
                 <AppWeightChart />
-              </Grid>
+              </Grid> */}
                 
               {/* Carbon Credits and Methane Gas */}
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={24} sm={12}>
                 <CarbonCredits/>
               </Grid>
               
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={24} sm={12}>
                 <MethaneGas/>
               </Grid>
 

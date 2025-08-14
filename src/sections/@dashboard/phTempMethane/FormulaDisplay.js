@@ -1,7 +1,57 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "@mui/material";
+import Biogasapi from "../../../pages/apis/Biogasapi";
 
 const FormulaDisplay = () => {
+  const [methane5, setMethane5] = useState(0);
+  const [methane6, setMethane6] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchData = async () => {
+      try {
+        const res = await Biogasapi.get("/dashboard?device_id=1368");
+        if (!res.error && Array.isArray(res.data) && res.data.length > 0) {
+          const row = res.data[0];
+          if (isMounted) {
+            setMethane5(Number(row.methane5 || 0));
+            setMethane6(Number(row.methane6 || 0));
+          }
+        }
+      } catch (e) {
+        // keep defaults on error
+      }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 10000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  const result = methane5 + methane6;
+
+  const renderBox = (value, label) => (
+    <div
+      style={{
+        height: "60px",
+        display: "grid",
+        placeItems: "center",
+        margin: "0 5px",
+        border: "2px solid #333",
+        borderRadius: "8px",
+      }}
+    >
+      <div style={{ color: "#000", fontWeight: "bold", fontSize: "2.125rem" }}>
+        {typeof value === "number" ? value.toFixed(2) : value}
+      </div>
+      <div style={{ fontSize: "0.9rem", color: "#333" }}>{label}</div>
+    </div>
+  );
+
   return (
     <Card
       sx={{
@@ -23,7 +73,6 @@ const FormulaDisplay = () => {
           textAlign: "center",
           display: "grid",
           gridTemplateRows: "1fr 1fr",
-          // gap: "15px",
           height: "100%",
         }}
       >
@@ -37,9 +86,9 @@ const FormulaDisplay = () => {
             gap: "60px",
           }}
         >
-          <div 
-            style={{ 
-              color: "#333", 
+          <div
+            style={{
+              color: "#333",
               fontWeight: "bold",
               margin: "0 5px",
               display: "grid",
@@ -47,12 +96,12 @@ const FormulaDisplay = () => {
               fontSize: "1.25rem",
             }}
           >
-            Total {'>'} 100
+            Total {">"} 100
           </div>
-          
-          <div 
-            style={{ 
-              color: "#333", 
+
+          <div
+            style={{
+              color: "#333",
               fontWeight: "bold",
               margin: "0 5px",
               display: "grid",
@@ -60,12 +109,12 @@ const FormulaDisplay = () => {
               fontSize: "1.25rem",
             }}
           >
-            Total {'<'} 100
+            Total {"<"} 100
           </div>
-          
-          <div 
-            style={{ 
-              color: "#333", 
+
+          <div
+            style={{
+              color: "#333",
               fontWeight: "bold",
               margin: "0 5px",
               display: "grid",
@@ -99,14 +148,14 @@ const FormulaDisplay = () => {
             }}
           >
             <div style={{ color: "#000", fontWeight: "bold", fontSize: "2.125rem" }}>
-              Input 1
+              {methane5}
             </div>
           </div>
 
           {/* Plus sign */}
-          <div 
-            style={{ 
-              fontWeight: "bold", 
+          <div
+            style={{
+              fontWeight: "bold",
               color: "#333",
               margin: "0 10px",
               display: "grid",
@@ -129,14 +178,14 @@ const FormulaDisplay = () => {
             }}
           >
             <div style={{ color: "#000", fontWeight: "bold", fontSize: "2.125rem" }}>
-              Input 2
+              {methane6}
             </div>
           </div>
 
           {/* Equals sign */}
-          <div 
-            style={{ 
-              fontWeight: "bold", 
+          <div
+            style={{
+              fontWeight: "bold",
               color: "#333",
               margin: "0 10px",
               display: "grid",
@@ -159,7 +208,7 @@ const FormulaDisplay = () => {
             }}
           >
             <div style={{ color: "#000", fontWeight: "bold", fontSize: "2.125rem" }}>
-              Result
+                {result}
             </div>
           </div>
         </div>

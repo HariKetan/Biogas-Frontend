@@ -22,25 +22,34 @@ const StyledIcon = styled("div")(({ theme }) => ({
 }));
 
 const Temp = () => {
- const [temperature,settemperature] = useState(0.0)
-  const [value, setValue] = useState(0.5); // Initial value
+ const [ph4, setPh4] = useState(0.0)
+  const [displayPh4, setDisplayPh4] = useState(0.0) // Smooth display value
   const [isPopped, setIsPopped] = useState(false);
 
+  // Function to check if pH4 change is significant enough to update
+  const isSignificantChange = (newPh4, currentPh4) => {
+    const changeThreshold = 0.1; // Only update if change is more than 0.1 pH
+    return Math.abs(newPh4 - currentPh4) > changeThreshold;
+  };
 
   // Simulate live data updates
   useEffect(() => {
     const fetchrecentvalues = async () => {
       try {
-          const response = await Biogasapi.get("/dashboard");
+          const response = await Biogasapi.get("/dashboard?device_id=1368");
   
           if (!response.error) {
 
             const firstSensorValue = response.data[0];
+            const newPh4 = firstSensorValue.ph4 ? parseFloat(firstSensorValue.ph4) : 0.0;
 
-            // Update only the 'r' value in the state
-            console.log(firstSensorValue)
-            settemperature(firstSensorValue.temperature ? firstSensorValue.temperature : 0.0);            
-        //    console.log(firstSensorValue.r)
+            // Only update if the change is significant
+            if (isSignificantChange(newPh4, ph4)) {
+              setPh4(newPh4);
+              console.log(`pH4 updated: ${ph4} -> ${newPh4}`);
+            }
+            
+        //    console.log(firstSensorValue.ph4)
 
           }
       } catch (err) {
@@ -50,23 +59,33 @@ const Temp = () => {
 
     const interval = setInterval(() => {
       fetchrecentvalues();
-  //    console.log(r)
+  //    console.log(ph4)
 
-    }, 3000); // Update every 3 seconds
+    }, 3000); // Update every 10 seconds instead of 3 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [ph4]);
 
+  // Smooth the display value to prevent rapid switching
   useEffect(() => {
-//    console.log(r); // You can remove or modify this line
-    setValue(temperature);
-    setIsPopped(true);
+    if (Math.abs(displayPh4 - ph4) > 0.05) {
+      // Smooth transition to new pH4 value
+      const timer = setTimeout(() => {
+        setDisplayPh4(ph4);
+      }, 500); // 500ms delay for smooth transition
+      
+      return () => clearTimeout(timer);
+    }
+  }, [ph4, displayPh4]);
 
-    // Reset the popping effect after a short delay
-    setTimeout(() => {
-      setIsPopped(false);
-    }, 300);
-  }, [temperature]);
+  // Remove the problematic useEffect that was resetting the value
+  // useEffect(() => {
+  //   setValue(ph4);
+  //   setIsPopped(true);
+  //   setTimeout(() => {
+  //     setIsPopped(false);
+  //   }, 300);
+  // }, [ph4]);
 
   return (
     <Card
@@ -105,14 +124,14 @@ const Temp = () => {
         minValue={0}
         height={190}
         width={290}
-        value={value}
+        value={displayPh4} // Use smooth display pH4 instead of raw pH4
         needleTransition="easeQuadIn"
-        needleTransitionDuration={1000}
+        needleTransitionDuration={2000} // Slower transition for smoother movement
         needleColor="White"
-        startColor="blue"
-        endColor="red"   
+        startColor="red"
+        endColor="blue"   
         segments={10} 
-        segmentColors={["blue", "dodgerblue", "deepskyblue", "lightskyblue", "lightcyan", "lightgoldenrodyellow", "khaki", "darkorange", "orangered", "red"]}
+        segmentColors={["red", "orangered", "darkorange", "orange", "yellow", "lightgreen", "green", "lightblue", "blue", "darkblue"]}
         hideText={1}
         valueTextFontSize="0" 
       />
@@ -125,7 +144,7 @@ const Temp = () => {
           textAlign: "center",
         }}
       >
-        <Typography variant="h5">{`${(value).toFixed(2)} °C`}</Typography>
+        <Typography variant="h5">{`${(displayPh4).toFixed(2)} °C`}</Typography>
       </div>
     </Card>
   );

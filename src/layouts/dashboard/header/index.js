@@ -47,7 +47,7 @@ export default function Header({ onOpenNav }) {
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
   const [isAutoMode, setIsAutoMode] = useState(true); // true for auto, false for manual
   const currentLocation = 'Microsoft, Hyderabad';
-  const currentArea = 'Hyderabad';
+  const currentArea = '';
   
   useEffect(() => {
     const interval = setInterval(() => {

@@ -10,24 +10,24 @@ import Biogasapi from '../../../pages/apis/Biogasapi';
 
 export default function AppHumidityChart() {
   const [chartData, setChartData] = useState([]);
-  const [currentHumidity, setCurrentHumidity] = useState(0);
+  const [currentPh3, setCurrentPh3] = useState(0);
   const [historicalData, setHistoricalData] = useState([]);
 
-  // Fetch humidity data
+  // Fetch pH3 data
   useEffect(() => {
-    const fetchHumidityData = async () => {
+    const fetchPh3Data = async () => {
       try {
-        const response = await Biogasapi.get("/dashboard");
+        const response = await Biogasapi.get("/dashboard?device_id=1368");
         
-        console.log('Full API Response (Humidity):', response);
-        console.log('Response data length (Humidity):', response.data?.length);
+        console.log('Full API Response (pH3):', response);
+        console.log('Response data length (pH3):', response.data?.length);
         
         if (!response.error && response.data && response.data.length > 0) {
-          console.log('API Response Data (Humidity):', response.data);
+          console.log('API Response Data (pH3):', response.data);
           
           const firstSensorValue = response.data[0];
-          const currentHum = firstSensorValue.humidity ? parseFloat(firstSensorValue.humidity) : 0;
-          setCurrentHumidity(currentHum);
+          const currentPh3Value = firstSensorValue.ph3 ? parseFloat(firstSensorValue.ph3) : 0;
+          setCurrentPh3(currentPh3Value);
           
           // Store all historical data
           setHistoricalData(response.data);
@@ -38,16 +38,15 @@ export default function AppHumidityChart() {
           
           if (response.data.length === 1) {
             // Create multiple data points for better visualization
-            const baseHumidity = currentHum;
+            const basePh3 = currentPh3Value;
             const now = new Date();
             
             // Create 10 data points over the last 30 minutes
             for (let i = 9; i >= 0; i -= 1) {
               const time = new Date(now.getTime() - i * 3 * 60 * 1000); // 3-minute intervals
-              const variation = (Math.random() - 0.5) * 4; // Small random variation
-              const humidity = Math.max(0, Math.min(100, baseHumidity + variation));
+              const ph3 = basePh3;
               
-              chartDataPoints.push(parseFloat(humidity.toFixed(1)));
+              chartDataPoints.push(parseFloat(ph3.toFixed(2)));
               timeLabels.push(time.toLocaleTimeString('en-US', { 
                 hour: '2-digit', 
                 minute: '2-digit',
@@ -59,9 +58,9 @@ export default function AppHumidityChart() {
             const reversedData = [...response.data].reverse();
             
             chartDataPoints = reversedData.map((item, index) => {
-              const hum = item.humidity ? parseFloat(item.humidity) : 0;
-              console.log(`Data point ${index}: humidity = ${hum}`);
-              return hum;
+              const ph3 = item.ph3 ? parseFloat(item.ph3) : 0;
+              console.log(`Data point ${index}: ph3 = ${ph3}`);
+              return ph3;
             });
             
             timeLabels = reversedData.map((item, index) => {
@@ -78,31 +77,31 @@ export default function AppHumidityChart() {
             });
           }
 
-          console.log('Final Humidity Data Array:', chartDataPoints);
-          console.log('Final Timestamps Array (Humidity):', timeLabels);
-          console.log('Data points count (Humidity):', chartDataPoints.length);
+          console.log('Final pH3 Data Array:', chartDataPoints);
+          console.log('Final Timestamps Array (pH3):', timeLabels);
+          console.log('Data points count (pH3):', chartDataPoints.length);
 
           setChartData([
             {
-              name: 'Humidity',
+              name: 'pH Level 3',
               type: 'line',
               fill: 'gradient',
               data: chartDataPoints,
             },
           ]);
         } else {
-          console.log('No data received or empty response (Humidity)');
+          console.log('No data received or empty response (pH3)');
         }
       } catch (err) {
-        console.error('Error fetching humidity data:', err.message);
+        console.error('Error fetching pH3 data:', err.message);
       }
     };
 
     // Initial fetch
-    fetchHumidityData();
+    fetchPh3Data();
 
     // Set up interval for real-time updates
-    const interval = setInterval(fetchHumidityData, 30000); // Update every 30 seconds
+    const interval = setInterval(fetchPh3Data, 30000); // Update every 30 seconds
 
     return () => clearInterval(interval);
   }, []);
@@ -178,15 +177,15 @@ export default function AppHumidityChart() {
     },
     yaxis: {
       title: {
-        text: 'Humidity (%)',
+        text: 'pH Level',
         style: {
           fontSize: '12px',
           fontWeight: 600,
           color: '#263238'
         }
       },
-      min: chartData[0]?.data?.length > 0 ? Math.max(0, (Math.min(...chartData[0].data) - 10)) : 0,
-      max: chartData[0]?.data?.length > 0 ? Math.min(100, (Math.max(...chartData[0].data) + 10)) : 100,
+      min: chartData[0]?.data?.length > 0 ? Math.max(0, (Math.min(...chartData[0].data) - 0.5)) : 0,
+      max: chartData[0]?.data?.length > 0 ? Math.min(14, (Math.max(...chartData[0].data) + 0.5)) : 14,
       labels: {
         style: {
           fontSize: '11px',
@@ -206,7 +205,7 @@ export default function AppHumidityChart() {
       y: {
         formatter: (y) => {
           if (typeof y !== 'undefined') {
-            return `Humidity: ${y.toFixed(1)} %`;
+            return `pH Level: ${y.toFixed(2)}`;
           }
           return y;
         },
@@ -302,7 +301,7 @@ export default function AppHumidityChart() {
       >
         <Typography variant="subtitle1">
         {/* ({historicalData.length} data points) */}
-          <h4>Humidity Trend</h4>
+          <h4>pH Level Trend</h4>
         </Typography>
       </div>
 
@@ -322,7 +321,7 @@ export default function AppHumidityChart() {
             height: '300px',
             color: '#666'
           }}>
-            <Typography>Loading humidity data...</Typography>
+            <Typography>Loading pH Level data...</Typography>
           </div>
         )}
       </Box>
@@ -334,7 +333,7 @@ export default function AppHumidityChart() {
           textAlign: "center",
         }}
       >
-        <Typography variant="h6">Current: {currentHumidity.toFixed(1)} %</Typography>
+        <Typography variant="h6">Current: {currentPh3.toFixed(2)}</Typography>
       </div>
     </Card>
   );

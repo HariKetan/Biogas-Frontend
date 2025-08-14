@@ -31,7 +31,7 @@ const GaugePopup = styled("div")({
 });
 
 const Frequency = () => {
-  const [frequency,setfrequency] = useState(0.0)
+  const [methane4, setMethane4] = useState(0.0)
   const [value, setValue] = useState(0.5); // Initial value
   const [isPopped, setIsPopped] = useState(false);
 
@@ -40,15 +40,15 @@ const Frequency = () => {
   useEffect(() => {
     const fetchrecentvalues = async () => {
       try {
-          const response = await Biogasapi.get("/dashboard");
+          const response = await Biogasapi.get("/dashboard?device_id=1368");
   
           if (!response.error) {
 
             const firstSensorValue = response.data[0];
 
-            // Update only the 'r' value in the state
-            setfrequency(firstSensorValue.frequency ? firstSensorValue.frequency : 0.0);            
-        //    console.log(firstSensorValue.r)
+            // Update only the 'methane4' value in the state
+            setMethane4(firstSensorValue.methane4 ? firstSensorValue.methane4 : 0.0);            
+        //    console.log(firstSensorValue.methane4)
 
           }
       } catch (err) {
@@ -58,23 +58,21 @@ const Frequency = () => {
 
     const interval = setInterval(() => {
       fetchrecentvalues();
-  //    console.log(r)
+  //    console.log(methane4)
 
     }, 3000); // Update every 3 seconds
 
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-//    console.log(r); // You can remove or modify this line
-    setValue(frequency);
-    setIsPopped(true);
-
-    // Reset the popping effect after a short delay
-    setTimeout(() => {
-      setIsPopped(false);
-    }, 300);
-  }, [frequency]);
+  // Remove the problematic useEffect that was resetting the value
+  // useEffect(() => {
+  //   setValue(methane4);
+  //   setIsPopped(true);
+  //   setTimeout(() => {
+  //     setIsPopped(false);
+  //   }, 300);
+  // }, [methane4]);
   return (
     <Card
       sx={{
@@ -99,7 +97,7 @@ const Frequency = () => {
           justifyContent: "center",
         }}
       >
-        <Typography variant="subtitle1"><h4>Frequency</h4></Typography>
+        <Typography variant="subtitle1"><h4>Standard Flow</h4></Typography>
       </div>
 
       <StyledIcon>
@@ -115,7 +113,7 @@ const Frequency = () => {
         }}
       >
         <Typography variant="h4">
-          {`${(value).toFixed(2)} Hz`}
+          {`${(methane4).toFixed(2)} Nm3/h`}
         </Typography>
       </div>
     </Card>

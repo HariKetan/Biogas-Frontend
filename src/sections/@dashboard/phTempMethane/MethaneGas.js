@@ -22,31 +22,25 @@ const StyledIcon = styled("div")(({ theme }) => ({
 
 const MethaneGas = () => {
   const [methaneGas, setMethaneGas] = useState(0.0)
-
-  // Simulate live data updates
+  const [isMounted, setIsMounted] = useState(true);
+    // Simulate live data updates
   useEffect(() => {
-    const fetchrecentvalues = async () => {
+  const fetchData = async () => {
       try {
-          const response = await Biogasapi.get("/dashboard");
-  
-          if (!response.error) {
-
-            const firstSensorValue = response.data[0];
-
-            // Get methane gas value from sensor data
-            // You can modify this based on your specific sensor data structure
-            const methaneValue = firstSensorValue.methane ? firstSensorValue.methane : 0.0;
-            setMethaneGas(methaneValue);            
-        //    console.log(methaneValue)
-
-          }
-      } catch (err) {
-          console.error(err.message);
-      } 
-  };
+        const res = await Biogasapi.get("/dashboard?device_id=1368");
+        if (!res.error && Array.isArray(res.data) && res.data.length > 0) {
+          const row = res.data[0];
+          // Fixed formula: calculate average of methane5 and methane6
+          const avgMethane = row.methane5+row.methane6
+          setMethaneGas(avgMethane);
+        }
+      } catch (e) {
+        // keep defaults on error
+      }
+    };
 
     const interval = setInterval(() => {
-      fetchrecentvalues();
+      fetchData();
   //    console.log(methaneGas)
 
     }, 3000); // Update every 3 seconds
@@ -92,10 +86,10 @@ const MethaneGas = () => {
             fontSize: "2.5rem"
           }}
         >
-          {methaneGas.toFixed(2)}
+          {methaneGas}
         </Typography>
         <Typography variant="h2" style={{ color: "black", fontWeight: "bold" }}>
-          %
+          
         </Typography>
       </div>
     </Card>
