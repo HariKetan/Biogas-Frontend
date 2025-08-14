@@ -22,7 +22,8 @@ export default function Router() {
   const routes = useRoutes([
       {
         path: '/',
-        element: <LoginPage/>,index: true, // Set LoginPage as the root page
+        element: <LoginPage/>,
+        index: true, // Set LoginPage as the root page
       },
       {
       path: '/dashboard',
