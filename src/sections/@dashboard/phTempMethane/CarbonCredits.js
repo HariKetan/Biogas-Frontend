@@ -27,23 +27,25 @@ const CarbonCredits = () => {
   useEffect(() => {
     const fetchrecentvalues = async () => {
       try {
-          const response = await Biogasapi.get("/dashboard");
+          const response = await Biogasapi.get("/dashboard?device_id=1368");
   
-          if (!response.error) {
+          if (!response.error && response.data && response.data.length > 0) {
 
             const firstSensorValue = response.data[0];
 
             // Calculate carbon credits based on available data
             // Using weight as a base and applying a conversion factor
             // You can modify this calculation based on your specific requirements
-            const baseValue = firstSensorValue.weight ? firstSensorValue.weight : 0.0;
+            const baseValue = firstSensorValue && firstSensorValue.weight ? firstSensorValue.weight : 0.0;
             const calculatedCredits = baseValue * 2.5; // Example conversion factor
             setCarbonCredits(calculatedCredits);            
-        //    console.log(calculatedCredits)
+            console.log(`Carbon credits calculated: ${calculatedCredits} (based on weight: ${baseValue})`);
 
+          } else {
+            console.warn('No data received for carbon credits calculation');
           }
       } catch (err) {
-          console.error(err.message);
+          console.error('Error fetching carbon credits data:', err.message);
       } 
   };
 

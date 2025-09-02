@@ -23,9 +23,14 @@ const StyledIcon = styled("div")(({ theme }) => ({
 
 const YCard = () => {
   const [methane2, setMethane2] = useState(0.0)
+  const [lastValidMethane2, setLastValidMethane2] = useState(0.0)
   const [value, setValue] = useState(0.5); // Initial value
   const [isPopped, setIsPopped] = useState(false);
 
+  // Function to validate if the value is reasonable
+  const isValidMethaneValue = (value) => {
+    return value !== null && value !== undefined && !isNaN(value) && value >= 0 && value <= 1000000;
+  };
 
   // Simulate live data updates
   useEffect(() => {
@@ -33,25 +38,34 @@ const YCard = () => {
       try {
           const response = await Biogasapi.get("/dashboard?device_id=1368");
   
-          if (!response.error) {
-
+          if (!response.error && response.data && response.data.length > 0) {
             const firstSensorValue = response.data[0];
 
-            // Update only the 'methane2' value in the state
-            setMethane2(firstSensorValue.methane2 ? firstSensorValue.methane2 : 0.0);            
-       //     console.log(firstSensorValue.methane2)
-
+            // Only proceed if we have a valid methane2 value
+            if (firstSensorValue.methane2 !== null && firstSensorValue.methane2 !== undefined) {
+              const newMethane2 = parseFloat(firstSensorValue.methane2);
+              
+              if (isValidMethaneValue(newMethane2)) {
+                setMethane2(newMethane2);
+                setLastValidMethane2(newMethane2);
+                console.log(`Methane2 updated: ${lastValidMethane2} -> ${newMethane2}`);
+              } else {
+                console.warn('Invalid methane2 value received:', newMethane2);
+                setMethane2(lastValidMethane2); // Keep last valid value
+              }
+            } else {
+              console.warn('No methane2 data in response, keeping last value:', lastValidMethane2);
+              setMethane2(lastValidMethane2);
+            }
           }
       } catch (err) {
-          console.error(err.message);
+          console.error('Error fetching methane2 data:', err.message);
+          setMethane2(lastValidMethane2); // Keep last valid value on error
       } 
   };
 
-    const interval = setInterval(() => {
-      fetchrecentvalues();
-   //   console.log(methane2)
-
-    }, 3000); // Update every 3 seconds
+    fetchrecentvalues(); // Initial fetch
+    const interval = setInterval(fetchrecentvalues, 5000); // Update every 5 seconds
 
     return () => clearInterval(interval);
   }, []);

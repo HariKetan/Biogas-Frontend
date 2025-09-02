@@ -32,9 +32,14 @@ const GaugePopup = styled("div")({
 
 const Frequency = () => {
   const [methane4, setMethane4] = useState(0.0)
+  const [lastValidMethane4, setLastValidMethane4] = useState(0.0)
   const [value, setValue] = useState(0.5); // Initial value
   const [isPopped, setIsPopped] = useState(false);
 
+  // Function to validate if the value is reasonable
+  const isValidMethaneValue = (value) => {
+    return value !== null && value !== undefined && !isNaN(value) && value >= 0 && value <= 1000000;
+  };
 
   // Simulate live data updates
   useEffect(() => {
@@ -42,25 +47,34 @@ const Frequency = () => {
       try {
           const response = await Biogasapi.get("/dashboard?device_id=1368");
   
-          if (!response.error) {
-
+          if (!response.error && response.data && response.data.length > 0) {
             const firstSensorValue = response.data[0];
 
-            // Update only the 'methane4' value in the state
-            setMethane4(firstSensorValue.methane4 ? firstSensorValue.methane4 : 0.0);            
-        //    console.log(firstSensorValue.methane4)
-
+            // Only proceed if we have a valid methane4 value
+            if (firstSensorValue.methane4 !== null && firstSensorValue.methane4 !== undefined) {
+              const newMethane4 = parseFloat(firstSensorValue.methane4);
+              
+              if (isValidMethaneValue(newMethane4)) {
+                setMethane4(newMethane4);
+                setLastValidMethane4(newMethane4);
+                console.log(`Methane4 updated: ${lastValidMethane4} -> ${newMethane4}`);
+              } else {
+                console.warn('Invalid methane4 value received:', newMethane4);
+                setMethane4(lastValidMethane4); // Keep last valid value
+              }
+            } else {
+              console.warn('No methane4 data in response, keeping last value:', lastValidMethane4);
+              setMethane4(lastValidMethane4);
+            }
           }
       } catch (err) {
-          console.error(err.message);
+          console.error('Error fetching methane4 data:', err.message);
+          setMethane4(lastValidMethane4); // Keep last valid value on error
       } 
   };
 
-    const interval = setInterval(() => {
-      fetchrecentvalues();
-  //    console.log(methane4)
-
-    }, 3000); // Update every 3 seconds
+    fetchrecentvalues(); // Initial fetch
+    const interval = setInterval(fetchrecentvalues, 5000); // Update every 5 seconds
 
     return () => clearInterval(interval);
   }, []);

@@ -34,6 +34,24 @@ export default defineConfig({
     open: false,
     host: true,
     cors: true,
+    // Security: Restrict file system access
+    fs: {
+      strict: true,
+      allow: [
+        // Allow access to workspace and node_modules
+        '/root/Biogas/Biogas-Frontend',
+        '/root/Biogas/Biogas-Frontend/node_modules',
+        // Explicitly deny .env files from being served
+        '!/root/Biogas/Biogas-Frontend/.env*',
+      ],
+      deny: [
+        '.env*',
+        '**/.env*',
+        '**/.*',
+        '**/*.log',
+        '**/node_modules/.cache/**',
+      ],
+    },
     // Proxy API calls if needed
     proxy: {
       '/api': {

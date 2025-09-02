@@ -40,6 +40,7 @@ const getWeightColor = (weight) => {
 const Weight = () => {
   const [weight, setWeight] = useState(0.0)
   const [displayWeight, setDisplayWeight] = useState(0.0) // Smooth display value
+  const [lastValidWeight, setLastValidWeight] = useState(0.0) // Store last valid value
   const [isPopped, setIsPopped] = useState(false);
 
   // Function to check if weight change is significant enough to update
@@ -48,39 +49,50 @@ const Weight = () => {
     return Math.abs(newWeight - currentWeight) > changeThreshold;
   };
 
+  // Function to validate if the value is reasonable
+  const isValidWeightValue = (value) => {
+    return value !== null && value !== undefined && !isNaN(value) && value >= 0 && value <= 10000; // Assuming max 10 tons
+  };
+
   // Simulate live data updates
   useEffect(() => {
     const fetchrecentvalues = async () => {
       try {
           const response = await Biogasapi.get("/dashboard?device_id=1368");
   
-          if (!response.error) {
-
+          if (!response.error && response.data && response.data.length > 0) {
             const firstSensorValue = response.data[0];
-            const newWeight = firstSensorValue.weight ? parseFloat(firstSensorValue.weight) : 0.0;
-
-            // Only update if the change is significant
-            if (isSignificantChange(newWeight, weight)) {
-              setWeight(newWeight);
-              console.log(`Weight updated: ${weight} -> ${newWeight}`);
-            }
             
-        //    console.log(firstSensorValue.weight)
-
+            // Only proceed if we have a valid weight value
+            if (firstSensorValue.weight !== null && firstSensorValue.weight !== undefined) {
+              const newWeight = parseFloat(firstSensorValue.weight);
+              
+              // Validate the new value is reasonable
+              if (isValidWeightValue(newWeight)) {
+                // Only update if the change is significant OR if we don't have a valid last value
+                if (lastValidWeight === 0.0 || isSignificantChange(newWeight, lastValidWeight)) {
+                  setWeight(newWeight);
+                  setLastValidWeight(newWeight);
+                  console.log(`Weight updated: ${lastValidWeight} -> ${newWeight}`);
+                }
+              } else {
+                console.warn('Invalid weight value received:', newWeight);
+              }
+            } else {
+              console.warn('No weight data in response, keeping last value:', lastValidWeight);
+            }
           }
       } catch (err) {
-          console.error(err.message);
+          console.error('Error fetching weight data:', err.message);
+          // Keep last valid value on error
       } 
   };
 
-    const interval = setInterval(() => {
-      fetchrecentvalues();
-  //    console.log(weight)
-
-    }, 3000); // Update every 10 seconds instead of 3 seconds
+    fetchrecentvalues(); // Initial fetch
+    const interval = setInterval(fetchrecentvalues, 5000); // Update every 5 seconds
 
     return () => clearInterval(interval);
-  }, [weight]);
+  }, []); // Remove weight dependency to prevent loops
 
   // Smooth the display value to prevent rapid switching
   useEffect(() => {

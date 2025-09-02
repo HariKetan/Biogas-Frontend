@@ -26,7 +26,12 @@ export default function AppTemperatureChart() {
           console.log('API Response Data:', response.data);
           
           const firstSensorValue = response.data[0];
-          const currentTemperature = firstSensorValue.ph4 ? parseFloat(firstSensorValue.ph4) : 0;
+          const currentTemperature = (firstSensorValue.ph4 !== null && firstSensorValue.ph4 !== undefined) 
+            ? parseFloat(firstSensorValue.ph4) : 0;
+          
+          console.log('Raw ph4 value:', firstSensorValue.ph4);
+          console.log('Parsed temperature:', currentTemperature);
+          
           setCurrentTemperature(currentTemperature);
           
           // Store all historical data
@@ -41,10 +46,10 @@ export default function AppTemperatureChart() {
             const baseTemperature = currentTemperature;
             const now = new Date();
             
-            // Create 10 data points over the last 30 minutes
+            // Create 10 data points over the last 30 minutes for better visualization
             for (let i = 9; i >= 0; i -= 1) {
               const time = new Date(now.getTime() - i * 3 * 60 * 1000); // 3-minute intervals
-              // const variation = (Math.random() - 0.5) * 0.5; // Small random variation for pH
+              // Use the current temperature for all points (since we only have one reading)
               const temperature = baseTemperature;
               
               chartDataPoints.push(parseFloat(temperature.toFixed(2)));
@@ -54,6 +59,9 @@ export default function AppTemperatureChart() {
                 hour12: false 
               }));
             }
+            
+            console.log('Generated chart data points:', chartDataPoints);
+            console.log('Base temperature used:', baseTemperature);
           } else {
             // Use actual historical data
             const reversedData = [...response.data].reverse();
@@ -84,7 +92,7 @@ export default function AppTemperatureChart() {
 
           setChartData([
             {
-              name: 'pH Level 4',
+              name: 'Temperature',
               type: 'line',
               fill: 'gradient',
               data: chartDataPoints,
@@ -92,6 +100,8 @@ export default function AppTemperatureChart() {
           ]);
         } else {
           console.log('No data received or empty response');
+          console.log('Response error:', response.error);
+          console.log('Response data:', response.data);
         }
       } catch (err) {
         console.error('Error fetching pH4 data:', err.message);
@@ -178,14 +188,14 @@ export default function AppTemperatureChart() {
     },
     yaxis: {
       title: {
-        text: 'pH Level',
+        text: 'Temperature (°C)',
         style: {
           fontSize: '12px',
           fontWeight: 600,
           color: '#263238'
         }
       },
-      min: chartData[0]?.data?.length > 0 ? (Math.min(...chartData[0].data) - 5) : 0,
+      min: chartData[0]?.data?.length > 0 ? Math.max(0, Math.min(...chartData[0].data) - 5) : 0,
       max: chartData[0]?.data?.length > 0 ? (Math.max(...chartData[0].data) + 5) : 50,
       labels: {
         style: {
@@ -334,7 +344,11 @@ export default function AppTemperatureChart() {
           textAlign: "center",
         }}
       >
-        <Typography variant="h6">Current: {currentTemperature.toFixed(1)}</Typography>
+        <Typography variant="h6">
+          Current: {currentTemperature !== null && currentTemperature !== undefined 
+            ? `${currentTemperature.toFixed(1)} °C` 
+            : 'No data'}
+        </Typography>
       </div>
     </Card>
   );

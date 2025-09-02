@@ -40,6 +40,7 @@ const getPhColor = (ph) => {
 const PhComponent = () => {
    const [ph3, setPh3] = useState(0.0)
   const [displayPh3, setDisplayPh3] = useState(0.0) // Smooth display value
+  const [lastValidPh3, setLastValidPh3] = useState(0.0) // Store last valid value
   const [isPopped, setIsPopped] = useState(false);
 
   // Function to check if pH3 change is significant enough to update
@@ -48,39 +49,50 @@ const PhComponent = () => {
     return Math.abs(newPh3 - currentPh3) > changeThreshold;
   };
 
+  // Function to validate if the value is reasonable
+  const isValidPh3Value = (value) => {
+    return value !== null && value !== undefined && !isNaN(value) && value >= 0 && value <= 14;
+  };
+
   // Simulate live data updates
   useEffect(() => {
     const fetchrecentvalues = async () => {
       try {
           const response = await Biogasapi.get("/dashboard?device_id=1368");
   
-          if (!response.error) {
-
+          if (!response.error && response.data && response.data.length > 0) {
             const firstSensorValue = response.data[0];
-            const newPh3 = firstSensorValue.ph3 ? parseFloat(firstSensorValue.ph3) : 0.0;
-
-            // Only update if the change is significant
-            if (isSignificantChange(newPh3, ph3)) {
-              setPh3(newPh3);
-              console.log(`pH3 updated: ${ph3} -> ${newPh3}`);
-            }
             
-        //    console.log(firstSensorValue.ph3)
-
+            // Only proceed if we have a valid pH3 value
+            if (firstSensorValue.ph3 !== null && firstSensorValue.ph3 !== undefined) {
+              const newPh3 = parseFloat(firstSensorValue.ph3);
+              
+              // Validate the new value is reasonable
+              if (isValidPh3Value(newPh3)) {
+                // Only update if the change is significant OR if we don't have a valid last value
+                if (lastValidPh3 === 0.0 || isSignificantChange(newPh3, lastValidPh3)) {
+                  setPh3(newPh3);
+                  setLastValidPh3(newPh3);
+                  console.log(`pH3 updated: ${lastValidPh3} -> ${newPh3}`);
+                }
+              } else {
+                console.warn('Invalid pH3 value received:', newPh3);
+              }
+            } else {
+              console.warn('No pH3 data in response, keeping last value:', lastValidPh3);
+            }
           }
       } catch (err) {
-          console.error(err.message);
+          console.error('Error fetching pH3 data:', err.message);
+          // Keep last valid value on error
       } 
   };
 
-    const interval = setInterval(() => {
-      fetchrecentvalues();
-  //    console.log(ph3)
-
-    }, 3000); // Update every 10 seconds instead of 3 seconds
+    fetchrecentvalues(); // Initial fetch
+    const interval = setInterval(fetchrecentvalues, 5000); // Update every 5 seconds
 
     return () => clearInterval(interval);
-  }, [ph3]);
+  }, []); // Remove ph3 dependency to prevent loops
 
   // Smooth the display value to prevent rapid switching
   useEffect(() => {

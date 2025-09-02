@@ -5,6 +5,13 @@ import Biogasapi from "../../../pages/apis/Biogasapi";
 const FormulaDisplay = () => {
   const [methane5, setMethane5] = useState(0);
   const [methane6, setMethane6] = useState(0);
+  const [lastValidMethane5, setLastValidMethane5] = useState(0);
+  const [lastValidMethane6, setLastValidMethane6] = useState(0);
+
+  // Function to validate if the value is reasonable
+  const isValidMethaneValue = (value) => {
+    return value !== null && value !== undefined && !isNaN(value) && value >= 0 && value <= 1000000; // Reasonable upper limit
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -15,17 +22,51 @@ const FormulaDisplay = () => {
         if (!res.error && Array.isArray(res.data) && res.data.length > 0) {
           const row = res.data[0];
           if (isMounted) {
-            setMethane5(Number(row.methane5 || 0));
-            setMethane6(Number(row.methane6 || 0));
+            // Handle methane5
+            if (row.methane5 !== null && row.methane5 !== undefined) {
+              const newMethane5 = Number(row.methane5);
+              if (isValidMethaneValue(newMethane5)) {
+                setMethane5(newMethane5);
+                setLastValidMethane5(newMethane5);
+              } else {
+                console.warn('Invalid methane5 value received:', newMethane5);
+                // Keep last valid value
+                setMethane5(lastValidMethane5);
+              }
+            } else {
+              console.warn('No methane5 data in response, keeping last value:', lastValidMethane5);
+              setMethane5(lastValidMethane5);
+            }
+
+            // Handle methane6
+            if (row.methane6 !== null && row.methane6 !== undefined) {
+              const newMethane6 = Number(row.methane6);
+              if (isValidMethaneValue(newMethane6)) {
+                setMethane6(newMethane6);
+                setLastValidMethane6(newMethane6);
+              } else {
+                console.warn('Invalid methane6 value received:', newMethane6);
+                // Keep last valid value
+                setMethane6(lastValidMethane6);
+              }
+            } else {
+              console.warn('No methane6 data in response, keeping last value:', lastValidMethane6);
+              setMethane6(lastValidMethane6);
+            }
           }
         }
       } catch (e) {
-        // keep defaults on error
+        console.error('Error fetching methane data:', e.message);
+        // keep last valid values on error
+        if (isMounted) {
+          setMethane5(lastValidMethane5);
+          setMethane6(lastValidMethane6);
+        }
       }
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 10000);
+    const interval = setInterval(fetchData, 5000);
     return () => {
       isMounted = false;
       clearInterval(interval);

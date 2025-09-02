@@ -40,20 +40,22 @@ const Energy = () => {
   useEffect(() => {
     const fetchrecentvalues = async () => {
       try {
-          const response = await Biogasapi.get("/dashboard");
+          const response = await Biogasapi.get("/dashboard?device_id=1368");
   
-          if (!response.error) {
+          if (!response.error && response.data && response.data.length > 0) {
 
             const firstSensorValue = response.data[0];
 
             // Update only the energy value in the state
             // Using 'weight' field as energy since energy field is not present in JSON
-            setenergy(firstSensorValue.weight ? firstSensorValue.weight : 0.0);            
-        //    console.log(firstSensorValue.weight)
+            setenergy(firstSensorValue && firstSensorValue.weight ? firstSensorValue.weight : 0.0);            
+            console.log(`Energy updated: ${firstSensorValue.weight || 0.0}`);
 
+          } else {
+            console.warn('No data received for energy calculation');
           }
       } catch (err) {
-          console.error(err.message);
+          console.error('Error fetching energy data:', err.message);
       } 
   };
 

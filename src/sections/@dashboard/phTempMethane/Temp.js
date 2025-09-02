@@ -24,12 +24,18 @@ const StyledIcon = styled("div")(({ theme }) => ({
 const Temp = () => {
  const [ph4, setPh4] = useState(0.0)
   const [displayPh4, setDisplayPh4] = useState(0.0) // Smooth display value
+  const [lastValidPh4, setLastValidPh4] = useState(0.0) // Store last valid value
   const [isPopped, setIsPopped] = useState(false);
 
-  // Function to check if pH4 change is significant enough to update
+  // Function to check if temperature change is significant enough to update
   const isSignificantChange = (newPh4, currentPh4) => {
-    const changeThreshold = 0.1; // Only update if change is more than 0.1 pH
+    const changeThreshold = 0.1; // Only update if change is more than 0.1 degrees
     return Math.abs(newPh4 - currentPh4) > changeThreshold;
+  };
+
+  // Function to validate if the value is reasonable (for temperature, not pH)
+  const isValidPh4Value = (value) => {
+    return value !== null && value !== undefined && !isNaN(value) && value >= -50 && value <= 200;
   };
 
   // Simulate live data updates
@@ -38,33 +44,39 @@ const Temp = () => {
       try {
           const response = await Biogasapi.get("/dashboard?device_id=1368");
   
-          if (!response.error) {
-
+          if (!response.error && response.data && response.data.length > 0) {
             const firstSensorValue = response.data[0];
-            const newPh4 = firstSensorValue.ph4 ? parseFloat(firstSensorValue.ph4) : 0.0;
-
-            // Only update if the change is significant
-            if (isSignificantChange(newPh4, ph4)) {
-              setPh4(newPh4);
-              console.log(`pH4 updated: ${ph4} -> ${newPh4}`);
-            }
             
-        //    console.log(firstSensorValue.ph4)
-
+            // Only proceed if we have a valid pH4 value
+            if (firstSensorValue.ph4 !== null && firstSensorValue.ph4 !== undefined) {
+              const newPh4 = parseFloat(firstSensorValue.ph4);
+              
+              // Validate the new value is reasonable
+              if (isValidPh4Value(newPh4)) {
+                // Only update if the change is significant OR if we don't have a valid last value
+                if (lastValidPh4 === 0.0 || isSignificantChange(newPh4, lastValidPh4)) {
+                  setPh4(newPh4);
+                  setLastValidPh4(newPh4);
+                  console.log(`Temperature updated: ${lastValidPh4} -> ${newPh4}`);
+                }
+              } else {
+                console.warn('Invalid temperature value received:', newPh4);
+              }
+            } else {
+              console.warn('No temperature data in response, keeping last value:', lastValidPh4);
+            }
           }
       } catch (err) {
-          console.error(err.message);
+          console.error('Error fetching temperature data:', err.message);
+          // Keep last valid value on error
       } 
   };
 
-    const interval = setInterval(() => {
-      fetchrecentvalues();
-  //    console.log(ph4)
-
-    }, 3000); // Update every 10 seconds instead of 3 seconds
+    fetchrecentvalues(); // Initial fetch
+    const interval = setInterval(fetchrecentvalues, 5000); // Update every 5 seconds
 
     return () => clearInterval(interval);
-  }, [ph4]);
+  }, []); // Remove ph4 dependency to prevent loops
 
   // Smooth the display value to prevent rapid switching
   useEffect(() => {
@@ -112,7 +124,7 @@ const Temp = () => {
 
         }}
       >
-        <Typography variant="subtitle1"><h4>Temperature</h4></Typography>
+        <Typography variant="h6">Temperature</Typography>
       </div>
 
       <StyledIcon>
